@@ -7,19 +7,35 @@ mod macros;
 use std::{ffi::CString, os::raw::c_void, ptr::null_mut};
 mod JNI;
 use JNI::{
-    JNI_CreateJavaVM, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption,
-    jclass, jfieldID, jmethodID, jobject, jstring, va_list,
+    jclass, jfieldID, jmethodID, jobject, jstring, va_list, JNIEnv, JNI_CreateJavaVM, JavaVM,
+    JavaVMInitArgs, JavaVMOption, JNI_TRUE, JNI_VERSION_21,
 };
 
 impl JNIEnv {
-    gen_jni_method!(NewStringUTF, jstring, chars: *const i8);
-    gen_jni_method!(FindClass,jclass,name: *const i8);
-    gen_jni_method!(CallVoidMethod,(),obj: jobject, methodID: jmethodID, args: va_list);
-    gen_jni_method!(GetMethodID,jmethodID,clazz: jclass,name: *const i8,sig: *const i8);
-    gen_jni_method!(GetStaticObjectField,jobject, clazz: jclass, fieldID: jfieldID);
-    gen_jni_method!(GetStaticFieldID,jfieldID,clazz: jclass,
-        name: *const i8,
-        sig: *const i8);
+    gen_jni_method!(NewStringUTF,
+        jstring,
+        utf: *const ::std::os::raw::c_char);
+    gen_jni_method!(FindClass,
+        jclass,
+        name: *const ::std::os::raw::c_char);
+    gen_jni_method!(CallVoidMethod,
+        (),
+        obj: jobject,
+        methodID: jmethodID,
+        args: va_list);
+    gen_jni_method!(GetMethodID,
+        jmethodID,
+        clazz: jclass,name: *const ::std::os::raw::c_char,
+        sig: *const ::std::os::raw::c_char);
+    gen_jni_method!(GetStaticObjectField,
+        jobject,
+        clazz: jclass,
+        fieldID: jfieldID);
+    gen_jni_method!(GetStaticFieldID,
+        jfieldID,
+        clazz: jclass,
+        name: *const ::std::os::raw::c_char,
+        sig: *const ::std::os::raw::c_char);
 }
 
 impl JavaVM {
