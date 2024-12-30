@@ -7,43 +7,70 @@ mod macros;
 use std::{ffi::CString, os::raw::c_void, ptr::null_mut};
 mod JNI;
 use JNI::{
-    JNI_CreateJavaVM, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption,
-    jclass, jfieldID, jmethodID, jobject, jstring, jvalue,
+    JNI_CreateJavaVM, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
+    JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue, va_list,
 };
 
 impl JNIEnv {
-    gen_jni_method!(NewStringUTF,
-        jstring,
-        utf: *const ::std::os::raw::c_char);
-    gen_jni_method!(FindClass,
-        jclass,
-        name: *const ::std::os::raw::c_char);
-    gen_jni_method!(GetMethodID,
-        jmethodID,
-        clazz: jclass,name: *const ::std::os::raw::c_char,
-        sig: *const ::std::os::raw::c_char);
-    gen_jni_method!(GetStaticObjectField,
-        jobject,
+    fn FindClass(&mut self, name: *const ::std::os::raw::c_char) -> Option<jclass> {
+        unsafe {
+            let result = self.functions.as_ref()?.FindClass?(self, name);
+            if result.is_null() { None } else { Some(result) }
+        }
+    }
+    fn NewStringUTF(&mut self, utf: *const ::std::os::raw::c_char) -> Option<jstring> {
+        unsafe {
+            let result = self.functions.as_ref()?.NewStringUTF?(self, utf);
+            if result.is_null() { None } else { Some(result) }
+        }
+    }
+    fn CallStaticVoidMethodA(
+        &mut self,
+        cls: jclass,
+        methodID: jmethodID,
+        args: *const jvalue,
+    ) -> Option<()> {
+        unsafe {
+            Some(self.functions.as_ref()?.CallStaticVoidMethodA?(
+                self, cls, methodID, args,
+            ))
+        }
+    }
+
+    fn CallStaticIntMethodA(
+        &mut self,
         clazz: jclass,
-        fieldID: jfieldID);
-    gen_jni_method!(GetStaticFieldID,
-        jfieldID,
+        methodID: jmethodID,
+        args: *const jvalue,
+    ) -> Option<jint> {
+        unsafe {
+            let result =
+                self.functions.as_ref()?.CallStaticIntMethodA?(self, clazz, methodID, args);
+            Some(result)
+        }
+    }
+
+    fn GetStaticMethodID(
+        &mut self,
         clazz: jclass,
         name: *const ::std::os::raw::c_char,
-        sig: *const ::std::os::raw::c_char);
-    gen_jni_method!(CallVoidMethodA,
-        (),
-        obj: jobject,
-        methodID: jmethodID,
-        args: *const jvalue);
+        sig: *const ::std::os::raw::c_char,
+    ) -> Option<jmethodID> {
+        unsafe {
+            let result = self.functions.as_ref()?.GetStaticMethodID?(self, clazz, name, sig);
+            if result.is_null() { None } else { Some(result) }
+        }
+    }
 }
 
 impl JavaVM {
-    gen_jni_method!(DestroyJavaVM, i32);
+    fn DestroyJavaVM(&mut self) -> Option<i32> {
+        unsafe { self.functions.as_ref().unwrap().DestroyJavaVM.unwrap()(self).into() }
+    }
 }
 
-fn main() {
-    let optionString = CString::new("").unwrap().into_raw();
+fn main() -> ::std::io::Result<()> {
+    let optionString = c!(r"-Djava.class.path=.");
     let mut options = JavaVMOption {
         extraInfo: std::ptr::null_mut(),
         optionString,
@@ -64,16 +91,16 @@ fn main() {
             &mut jenv as *mut *mut JNIEnv as *mut *mut c_void,
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
-        let system_class = (*jenv).FindClass(c!("java/lang/System"));
-        let outField =
-            (*jenv).GetStaticFieldID(system_class, c!("out"), c!("Ljava/io/PrintStream;"));
-        let outObj = (*jenv).GetStaticObjectField(system_class, outField);
-        let printStreamClass = (*jenv).FindClass(c!("java/io/PrintStream"));
-        let printlnMethod =
-            (*jenv).GetMethodID(printStreamClass, c!("println"), c!("(Ljava/lang/String;)V"));
-        let msg = (*jenv).NewStringUTF(c!("Hello World"));
-        let arg = [jvalue { l: msg as jobject }];
-        (*jenv).CallVoidMethodA(outObj, printlnMethod, arg.as_ptr());
-        (*jvm).DestroyJavaVM();
+        let counter = (*jenv).FindClass(c!("Counter")).expect("Find Class err");
+        let mid = (*jenv)
+            .GetStaticMethodID(counter, c!("add"), c!("(II)I"))
+            .expect("Find Method err");
+        let arg: [jvalue; 2] = [jvalue { i: 100 }, jvalue { i: 5 }];
+        let sum = (*jenv)
+            .CallStaticIntMethodA(counter, mid, arg.as_ptr())
+            .expect("Call method err");
+        println!("sum is {}", sum);
+        (*jvm).DestroyJavaVM().expect("Destroy JVM err");
     }
+    Ok(())
 }
