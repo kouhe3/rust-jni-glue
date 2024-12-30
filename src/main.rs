@@ -6,7 +6,13 @@
 #![feature(c_variadic)]
 #[macro_use]
 mod macros;
-use std::{ffi::CString, os::raw::c_void, ptr::null_mut};
+use std::{
+    collections::HashMap,
+    ffi::CString,
+    ops::{Deref, DerefMut},
+    os::raw::c_void,
+    ptr::null_mut,
+};
 mod JNI;
 use JNI::{
     JNI_CreateJavaVM, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
@@ -62,11 +68,79 @@ impl JNIEnv {
             if result.is_null() { None } else { Some(result) }
         }
     }
+
+    fn new_J_class(&mut self, name: &str) -> Option<J_class> {
+        J_class {
+            JNIEnv: self,
+            clazz: self.FindClass(c!(name))?,
+        }
+        .into()
+    }
 }
 
 impl JavaVM {
     fn DestroyJavaVM(&mut self) -> Option<i32> {
         unsafe { self.functions.as_ref().unwrap().DestroyJavaVM.unwrap()(self).into() }
+    }
+}
+
+struct J_class {
+    JNIEnv: *mut JNIEnv,
+    clazz: jclass,
+}
+
+impl J_class {
+    unsafe fn StaticIntMethodA(
+        &mut self,
+        methodID: jmethodID,
+        args: *const jvalue,
+    ) -> Option<jint> {
+        unsafe { (***self).CallStaticIntMethodA(self.clazz, methodID, args) }
+    }
+    unsafe fn StaticMethodID(
+        &mut self,
+        name: *const ::std::os::raw::c_char,
+        sig: *const ::std::os::raw::c_char,
+    ) -> Option<jmethodID> {
+        unsafe { (***self).GetStaticMethodID(self.clazz, name, sig) }
+    }
+}
+struct Counter {
+    J_class: J_class,
+}
+
+impl Deref for J_class {
+    type Target = *mut JNIEnv;
+    fn deref(&self) -> &Self::Target {
+        &self.JNIEnv
+    }
+}
+impl DerefMut for J_class {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.JNIEnv
+    }
+}
+
+impl Deref for Counter {
+    type Target = J_class;
+    fn deref(&self) -> &Self::Target {
+        &self.J_class
+    }
+}
+
+impl DerefMut for Counter {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.J_class
+    }
+}
+
+impl Counter {
+    fn add(&mut self, a: jvalue, b: jvalue) -> Option<jint> {
+        unsafe {
+            let args = [a, b];
+            let add_method: jmethodID = self.StaticMethodID(c!("add"), c!("(II)I"))?;
+            self.StaticIntMethodA(add_method, args.as_ptr())
+        }
     }
 }
 
@@ -92,15 +166,14 @@ fn main() -> ::std::io::Result<()> {
             &mut jenv as *mut *mut JNIEnv as *mut *mut c_void,
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
-        let counter = (*jenv).FindClass(c!("Counter")).expect("Find Class err");
-        let mid = (*jenv)
-            .GetStaticMethodID(counter, c!("add"), c!("(II)I"))
-            .expect("Find Method err");
-        let arg: [jvalue; 2] = [jvalue { i: 100 }, jvalue { i: 5 }];
-        let sum = (*jenv)
-            .CallStaticIntMethodA(counter, mid, arg.as_ptr())
-            .expect("Call method err");
+        let mut counter = Counter {
+            J_class: (*jenv).new_J_class("Counter").unwrap(),
+        };
+        let sum = counter
+            .add(jvalue { i: 1 }, jvalue { i: 2 })
+            .expect("add err");
         println!("sum is {}", sum);
+
         (*jvm).DestroyJavaVM().expect("Destroy JVM err");
     }
     Ok(())
