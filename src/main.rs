@@ -90,6 +90,15 @@ struct J_class {
 }
 
 impl J_class {
+    fn new(jenv: *mut JNIEnv, class_name: &str) -> Option<Self> {
+        unsafe {
+            J_class {
+                JNIEnv: jenv,
+                clazz: (*jenv).FindClass(c!(class_name))?,
+            }
+            .into()
+        }
+    }
     unsafe fn StaticIntMethodA(
         &mut self,
         methodID: jmethodID,
@@ -105,6 +114,7 @@ impl J_class {
         unsafe { (***self).GetStaticMethodID(self.clazz, name, sig) }
     }
 }
+
 struct Counter {
     J_class: J_class,
 }
@@ -135,11 +145,16 @@ impl DerefMut for Counter {
 }
 
 impl Counter {
+    fn new(jenv: *mut JNIEnv) -> Option<Self> {
+        let J_class = J_class::new(jenv, "Counter")?;
+        Counter { J_class }.into()
+    }
+
     fn add(&mut self, a: jvalue, b: jvalue) -> Option<jint> {
         unsafe {
-            let args = [a, b];
-            let add_method: jmethodID = self.StaticMethodID(c!("add"), c!("(II)I"))?;
-            self.StaticIntMethodA(add_method, args.as_ptr())
+            let add = self.StaticMethodID(c!("add"), c!("(II)I"))?;
+            let r = self.StaticIntMethodA(add, [a,b].as_ptr())?;
+            Some(r)
         }
     }
 }
@@ -166,12 +181,9 @@ fn main() -> ::std::io::Result<()> {
             &mut jenv as *mut *mut JNIEnv as *mut *mut c_void,
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
-        let mut counter = Counter {
-            J_class: (*jenv).new_J_class("Counter").unwrap(),
-        };
-        let sum = counter
-            .add(jvalue { i: 1 }, jvalue { i: 2 })
-            .expect("add err");
+        let mut counter = Counter::new(jenv).unwrap();
+        let sum = counter.add(5, 10).unwrap();
+
         println!("sum is {}", sum);
 
         (*jvm).DestroyJavaVM().expect("Destroy JVM err");
