@@ -1,6 +1,8 @@
+use std::env;
 
 fn main() {
-    println!(r"cargo:rustc-link-search=C:\Program Files\Zulu\zulu-21\lib");
+    let java_home = env::var("JAVA_HOME").expect("JAVA_HOME not set");
+    println!("cargo:rustc-link-search={}/lib",java_home);
     println!("cargo:rustc-link-lib=jvm");
     /*
     let libclang_path = r"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64\bin\libclang.dll";
