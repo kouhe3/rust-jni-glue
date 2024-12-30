@@ -1,4 +1,3 @@
-use std::env;
 
 fn main() {
     println!(r"cargo:rustc-link-search=C:\Program Files\Zulu\zulu-21\lib");

@@ -7,8 +7,8 @@ mod macros;
 use std::{ffi::CString, os::raw::c_void, ptr::null_mut};
 mod JNI;
 use JNI::{
-    jclass, jfieldID, jmethodID, jobject, jstring, va_list, JNIEnv, JNI_CreateJavaVM, JavaVM,
-    JavaVMInitArgs, JavaVMOption, JNI_TRUE, JNI_VERSION_21,
+    JNI_CreateJavaVM, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption,
+    jclass, jfieldID, jmethodID, jobject, jstring, jvalue,
 };
 
 impl JNIEnv {
@@ -18,11 +18,6 @@ impl JNIEnv {
     gen_jni_method!(FindClass,
         jclass,
         name: *const ::std::os::raw::c_char);
-    gen_jni_method!(CallVoidMethod,
-        (),
-        obj: jobject,
-        methodID: jmethodID,
-        args: va_list);
     gen_jni_method!(GetMethodID,
         jmethodID,
         clazz: jclass,name: *const ::std::os::raw::c_char,
@@ -36,6 +31,11 @@ impl JNIEnv {
         clazz: jclass,
         name: *const ::std::os::raw::c_char,
         sig: *const ::std::os::raw::c_char);
+    gen_jni_method!(CallVoidMethodA,
+        (),
+        obj: jobject,
+        methodID: jmethodID,
+        args: *const jvalue);
 }
 
 impl JavaVM {
@@ -71,9 +71,9 @@ fn main() {
         let printStreamClass = (*jenv).FindClass(c!("java/io/PrintStream"));
         let printlnMethod =
             (*jenv).GetMethodID(printStreamClass, c!("println"), c!("(Ljava/lang/String;)V"));
-        let msg = (*jenv).NewStringUTF(c!("Hello You"));
-        (*jenv).CallVoidMethod(outObj, printlnMethod, msg as va_list);
-
+        let msg = (*jenv).NewStringUTF(c!("Hello World"));
+        let arg = [jvalue { l: msg as jobject }];
+        (*jenv).CallVoidMethodA(outObj, printlnMethod, arg.as_ptr());
         (*jvm).DestroyJavaVM();
     }
 }
