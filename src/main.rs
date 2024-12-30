@@ -153,7 +153,7 @@ impl Counter {
     fn add(&mut self, a: jvalue, b: jvalue) -> Option<jint> {
         unsafe {
             let add = self.StaticMethodID(c!("add"), c!("(II)I"))?;
-            let r = self.StaticIntMethodA(add, [a,b].as_ptr())?;
+            let r = self.StaticIntMethodA(add, [a, b].as_ptr())?;
             Some(r)
         }
     }
@@ -182,7 +182,7 @@ fn main() -> ::std::io::Result<()> {
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
         let mut counter = Counter::new(jenv).unwrap();
-        let sum = counter.add(5, 10).unwrap();
+        let sum = counter.add(jvalue { i: 1 }, jvalue { i: 2 }).unwrap();
 
         println!("sum is {}", sum);
 
