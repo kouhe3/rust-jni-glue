@@ -297,19 +297,15 @@ impl Deref for Counter {
 }
 
 impl Counter {
-    fn new(jenv: *mut JNIEnv) -> Option<Self> {
-        let J_class = J_class::new(jenv, "Counter")?;
-        Counter { J_class }.into()
-    }
-
     fn add(
-        &mut self,
+        jenv: *mut JNIEnv,
         a: jvalue,
         b: jvalue,
     ) -> Option<jint> {
         unsafe {
-            let add = self.StaticMethodID(c!("add"), c!("(II)I"))?;
-            let r = self.StaticIntMethodA(add, [a, b].as_ptr())?;
+            let mut J_class = J_class::new(jenv, "Counter")?;
+            let add = J_class.StaticMethodID(c!("add"), c!("(II)I"))?;
+            let r = J_class.StaticIntMethodA(add, [a, b].as_ptr())?;
             Some(r)
         }
     }
@@ -338,10 +334,7 @@ fn main() -> ::std::io::Result<()> {
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
 
-        let mut counter = Counter::new(jenv).expect("Failed find class Counter");
-        let sum = counter
-            .add(jvalue { i: 1 }, jvalue { i: 2 })
-            .unwrap();
+        let sum = Counter::add(jenv, jvalue { i: 1 }, jvalue { i: 2 }).unwrap();
 
         println!("sum is {}", sum);
 
