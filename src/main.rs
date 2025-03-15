@@ -226,50 +226,7 @@ struct Counter {
 
 struct Person {
     J_class: J_class,
-}
-
-struct Person_obj<'a> {
-    J_class: &'a mut Person,
     jobject: jobject,
-}
-
-impl Deref for Person_obj<'_> {
-    type Target = Person;
-    fn deref(&self) -> &Self::Target {
-        self.J_class
-    }
-}
-
-impl DerefMut for Person_obj<'_> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.J_class
-    }
-}
-
-impl<'a> Person_obj<'a> {
-    fn new(
-        person_clazz: &'a mut Person,
-        name: jvalue,
-        age: jvalue,
-    ) -> Option<Self> {
-        let args = [name, age];
-        let constructor = person_clazz.person()?;
-        let man = person_clazz.ObjectA(constructor, args.as_ptr())?;
-        Person_obj {
-            J_class: person_clazz,
-            jobject: man,
-        }
-        .into()
-    }
-
-    fn introduce(&mut self) -> Option<()> {
-        let method = self.MethodID(c!("introduce"), c!("()V"))?;
-        unsafe {
-            let args: [jvalue; 0] = [];
-            (*****self).CallVoidMethodA(self.jobject, method, args.as_ptr())?;
-            Some(())
-        }
-    }
 }
 
 impl Deref for Person {
@@ -285,21 +242,36 @@ impl DerefMut for Person {
     }
 }
 
-impl DerefMut for Counter {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.J_class
+impl Person {
+    fn new(
+        jenv: *mut JNIEnv,
+        name: jvalue,
+        age: jvalue,
+    ) -> Option<Self> {
+        let mut person_clazz = J_class::new(jenv, "Person")?;
+        let args = [name, age];
+        let constructor = person_clazz.constructor_methodid("(Ljava/lang/String;I)V")?;
+        let man = person_clazz.ObjectA(constructor, args.as_ptr())?;
+        Person {
+            J_class: person_clazz,
+            jobject: man,
+        }
+        .into()
+    }
+
+    fn introduce(&mut self) -> Option<()> {
+        let method = self.MethodID(c!("introduce"), c!("()V"))?;
+        unsafe {
+            let args: [jvalue; 0] = [];
+            (****self).CallVoidMethodA(self.jobject, method, args.as_ptr())?;
+            Some(())
+        }
     }
 }
 
-impl Person {
-    fn new(jenv: *mut JNIEnv) -> Option<Self> {
-        let J_class = J_class::new(jenv, "Person")?;
-        Person { J_class }.into()
-    }
-
-    fn person(&mut self) -> Option<jmethodID> {
-        let constructor = self.constructor_methodid("(Ljava/lang/String;I)V")?;
-        Some(constructor)
+impl DerefMut for Counter {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.J_class
     }
 }
 
@@ -363,6 +335,7 @@ fn main() -> ::std::io::Result<()> {
             &mut jenv as *mut *mut JNIEnv as *mut *mut c_void,
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
+
         let mut counter = Counter::new(jenv).unwrap();
         let sum = counter
             .add(jvalue { i: 1 }, jvalue { i: 2 })
@@ -370,15 +343,12 @@ fn main() -> ::std::io::Result<()> {
 
         println!("sum is {}", sum);
 
-        let mut person = Person::new(jenv).expect("Can not find class person");
         let name = (*jenv)
             .NewStringUTF(c!("zhangsan"))
             .unwrap();
         let age: jint = 18;
-        let mut zhangsan = Person_obj::new(&mut person, jvalue { l: name as jobject }, jvalue {
-            i: age,
-        })
-        .expect("Can not create person");
+        let mut zhangsan = Person::new(jenv, jvalue { l: name as jobject }, jvalue { i: age })
+            .expect("Can not create person");
         zhangsan
             .introduce()
             .expect("introduce err");
