@@ -15,7 +15,7 @@ use std::{
 };
 mod JNI;
 use JNI::{
-    JNI_CreateJavaVM, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
+    JNI_CreateJavaVM, JNI_FALSE, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
     JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue, va_list,
 };
 
@@ -169,7 +169,9 @@ impl J_class {
         unsafe {
             J_class {
                 JNIEnv: jenv,
-                clazz: (*jenv).FindClass(c!(class_name))?,
+                clazz: (*jenv)
+                    .FindClass(c!(class_name))
+                    .expect("Failed FindClass"),
             }
             .into()
         }
@@ -323,7 +325,7 @@ fn main() -> ::std::io::Result<()> {
         version: JNI_VERSION_21 as i32,
         nOptions: 1,
         options: &mut options,
-        ignoreUnrecognized: JNI_TRUE as u8,
+        ignoreUnrecognized: JNI_FALSE as u8,
     };
     let mut jvm = null_mut::<JavaVM>();
 
@@ -336,7 +338,7 @@ fn main() -> ::std::io::Result<()> {
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
 
-        let mut counter = Counter::new(jenv).unwrap();
+        let mut counter = Counter::new(jenv).expect("Failed find class Counter");
         let sum = counter
             .add(jvalue { i: 1 }, jvalue { i: 2 })
             .unwrap();
