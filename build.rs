@@ -13,5 +13,7 @@ fn main() {
         .clang_arg("c++")
         .generate()
         .expect("Err bindgen");
-    bindgens.write_to_file("JNI.rs").unwrap();
+    bindgens
+        .write_to_file("src/JNI.rs")
+        .unwrap();
 }
