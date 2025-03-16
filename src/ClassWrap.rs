@@ -36,10 +36,8 @@ impl Person {
     ) -> Option<Self> {
         unsafe {
             let mut this_class = J_class::new_FindClass(jenv, "Person")?;
-            let name = jvalue {
-                l: (*jenv).NewStringUTF(name)? as jobject,
-            };
-            let age = jvalue { i: age };
+            let name = jvalue::str(jenv, name)?;
+            let age = jvalue::jint(age)?;
             let args = [name, age];
             let this_method = this_class.GetMethodID("<init>", "(Ljava/lang/String;I)V")?;
             let man = this_class.NewObjectA(this_method, args.as_ptr())?;
@@ -76,11 +74,13 @@ impl Deref for Counter {
 impl Counter {
     pub fn add(
         jenv: *mut JNIEnv,
-        a: jvalue,
-        b: jvalue,
+        a: i32,
+        b: i32,
     ) -> Option<jint> {
         let mut this_class = J_class::new_FindClass(jenv, "Counter")?;
         let mut this_method = J_methodid::new_GetStaticMethodID(&mut this_class, "add", "(II)I")?;
+        let a = jvalue::jint(a)?;
+        let b = jvalue::jint(b)?;
         let args = [a, b].as_ptr();
         let r = this_method.CallStaticIntMethodA(args)?;
         Some(r)

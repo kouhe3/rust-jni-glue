@@ -46,7 +46,7 @@ fn main() -> ::std::io::Result<()> {
         );
 
         Counter::main(jenv, &jvalue { l: null_mut() });
-        let sum = Counter::add(jenv, jvalue { i: 1 }, jvalue { i: 2 }).unwrap();
+        let sum = Counter::add(jenv, 1, 2).unwrap();
 
         println!("sum is {}", sum);
 

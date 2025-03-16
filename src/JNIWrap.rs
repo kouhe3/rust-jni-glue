@@ -1,6 +1,7 @@
 use crate::JNI::{
-    JNI_CreateJavaVM, JNI_FALSE, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
-    JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue, va_list,
+    self, JNI_CreateJavaVM, JNI_FALSE, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM,
+    JavaVMInitArgs, JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue,
+    va_list,
 };
 use std::{
     ffi::CString,
@@ -242,5 +243,19 @@ impl J_methodid {
         args: *const jvalue,
     ) -> Option<()> {
         unsafe { (***self).CallStaticVoidMethodA(self.jmethodid, args) }
+    }
+}
+
+impl jvalue {
+    pub fn str(
+        jenv: *mut JNIEnv,
+        s: &str,
+    ) -> Option<jvalue> {
+        Some(jvalue {
+            l: unsafe { (*jenv).NewStringUTF(s)? as jobject },
+        })
+    }
+    pub fn jint(i: jint) -> Option<jvalue> {
+        Some(jvalue { i })
     }
 }
