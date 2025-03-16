@@ -36,8 +36,8 @@ impl Person {
     ) -> Option<Self> {
         let mut this_class = J_class::new(jenv, "Person")?;
         let args = [name, age];
-        let constructor = this_class.MethodID(c!("<init>"),c!("(Ljava/lang/String;I)V"))?;
-        let man = this_class.ObjectA(constructor, args.as_ptr())?;
+        let this_method = this_class.MethodID(c!("<init>"),c!("(Ljava/lang/String;I)V"))?;
+        let man = this_class.ObjectA(this_method, args.as_ptr())?;
         Person {
             J_class: this_class,
             jobject: man,
