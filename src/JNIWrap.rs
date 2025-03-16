@@ -160,15 +160,6 @@ impl J_class {
             .into()
         }
     }
-    pub fn constructor_methodid(
-        &mut self,
-        sig: &str,
-    ) -> Option<jmethodID> {
-        unsafe {
-            let r = (***self).GetMethodID(self.clazz, c!("<init>"), c!(sig))?;
-            if r.is_null() { None } else { Some(r) }
-        }
-    }
     pub fn MethodID(
         &mut self,
         name: *const ::std::os::raw::c_char,
