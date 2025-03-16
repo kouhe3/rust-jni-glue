@@ -5,7 +5,7 @@ use crate::JNI::{
 use std::ffi::CString;
 use std::ops::{Deref, DerefMut};
 
-use crate::JNIWrap::J_class;
+use crate::JNIWrap::{J_class, J_methodid};
 pub struct Counter {
     J_class: J_class,
 }
@@ -34,7 +34,7 @@ impl Person {
         name: jvalue,
         age: jvalue,
     ) -> Option<Self> {
-        let mut this_class = J_class::new(jenv, "Person")?;
+        let mut this_class = J_class::new_FindClass(jenv, "Person")?;
         let args = [name, age];
         let this_method = this_class.GetMethodID("<init>", "(Ljava/lang/String;I)V")?;
         let man = this_class.NewObjectA(this_method, args.as_ptr())?;
@@ -60,7 +60,6 @@ impl DerefMut for Counter {
     }
 }
 
-
 impl Deref for Counter {
     type Target = J_class;
     fn deref(&self) -> &Self::Target {
@@ -74,19 +73,18 @@ impl Counter {
         a: jvalue,
         b: jvalue,
     ) -> Option<jint> {
-        unsafe {
-            let mut this_class = J_class::new(jenv, "Counter")?;
-            let this_method = this_class.GetStaticMethodID("add", "(II)I")?;
-            let r = this_class.CallStaticIntMethodA(this_method, [a, b].as_ptr())?;
-            Some(r)
-        }
+        let mut this_class = J_class::new_FindClass(jenv, "Counter")?;
+        let mut this_method = J_methodid::new_GetStaticMethodID(&mut this_class, "add", "(II)I")?;
+        let args = [a, b].as_ptr();
+        let r = this_method.CallStaticIntMethodA(args)?;
+        Some(r)
     }
     pub fn main(
         jenv: *mut JNIEnv,
         args: *const jvalue,
     ) -> Option<()> {
         unsafe {
-            let mut this_class = J_class::new(jenv, "Counter")?;
+            let mut this_class = J_class::new_FindClass(jenv, "Counter")?;
             let this_method = this_class.GetStaticMethodID("main", "([Ljava/lang/String;)V")?;
             this_class.CallStaticVoidMethodA(this_method, args)?;
             Some(())

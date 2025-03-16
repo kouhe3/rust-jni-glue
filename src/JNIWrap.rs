@@ -2,7 +2,10 @@ use crate::JNI::{
     JNI_CreateJavaVM, JNI_FALSE, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
     JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue, va_list,
 };
-use std::{ffi::CString, ops::{Deref, DerefMut}};
+use std::{
+    ffi::CString,
+    ops::{Deref, DerefMut},
+};
 impl JNIEnv {
     pub fn NewObjectA(
         &mut self,
@@ -135,7 +138,7 @@ pub struct J_class {
 }
 
 impl J_class {
-    pub fn new(
+    pub fn new_FindClass(
         jenv: *mut JNIEnv,
         class_name: &str,
     ) -> Option<Self> {
@@ -154,9 +157,7 @@ impl J_class {
         name: &str,
         sig: &str,
     ) -> Option<jmethodID> {
-        unsafe {
-            (***self).GetMethodID(self.clazz, name, sig)
-        }
+        unsafe { (***self).GetMethodID(self.clazz, name, sig) }
     }
     pub unsafe fn CallStaticIntMethodA(
         &mut self,
@@ -177,9 +178,7 @@ impl J_class {
         name: &str,
         sig: &str,
     ) -> Option<jmethodID> {
-        unsafe {
-            (***self).GetStaticMethodID(self.clazz, name, sig)
-        }
+        unsafe { (***self).GetStaticMethodID(self.clazz, name, sig) }
     }
 
     pub fn NewObjectA(
@@ -200,5 +199,45 @@ impl Deref for J_class {
 impl DerefMut for J_class {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.JNIEnv
+    }
+}
+pub struct J_methodid {
+    J_class: *mut J_class,
+    jmethodid: jmethodID,
+}
+
+impl Deref for J_methodid {
+    type Target = *mut J_class;
+    fn deref(&self) -> &Self::Target {
+        &self.J_class
+    }
+}
+
+impl DerefMut for J_methodid {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.J_class
+    }
+}
+
+impl J_methodid {
+    pub fn new_GetStaticMethodID(
+        J_class: &mut J_class,
+        name: &str,
+        sig: &str,
+    ) -> Option<J_methodid> {
+        unsafe {
+            let jmethodid = J_class.GetStaticMethodID(name, sig)?;
+            Some(J_methodid {
+                J_class: J_class,
+                jmethodid,
+            })
+        }
+    }
+
+    pub fn CallStaticIntMethodA(
+        &mut self,
+        args: *const jvalue,
+    ) -> Option<jint> {
+        unsafe { (***self).CallStaticIntMethodA(self.jmethodid, args) }
     }
 }
