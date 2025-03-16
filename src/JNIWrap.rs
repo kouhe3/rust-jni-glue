@@ -6,6 +6,7 @@ use crate::JNI::{
 use std::{
     ffi::CString,
     ops::{Deref, DerefMut},
+    ptr::null_mut,
 };
 impl JNIEnv {
     pub fn NewObjectA(
@@ -257,5 +258,9 @@ impl jvalue {
     }
     pub fn jint(i: jint) -> Option<jvalue> {
         Some(jvalue { i })
+    }
+
+    pub fn null() -> Option<jvalue> {
+        Some(jvalue { l: null_mut() })
     }
 }
