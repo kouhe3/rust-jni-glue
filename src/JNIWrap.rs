@@ -228,7 +228,7 @@ impl J_methodid {
         unsafe {
             let jmethodid = J_class.GetStaticMethodID(name, sig)?;
             Some(J_methodid {
-                J_class: J_class,
+                J_class,
                 jmethodid,
             })
         }
@@ -239,5 +239,13 @@ impl J_methodid {
         args: *const jvalue,
     ) -> Option<jint> {
         unsafe { (***self).CallStaticIntMethodA(self.jmethodid, args) }
+    }
+    pub fn CallStaticVoidMethodA(
+        &mut self,
+        args: *const jvalue
+    ) -> Option<()> {
+        unsafe{
+            (***self).CallStaticVoidMethodA(self.jmethodid, args)
+        }
     }
 }
