@@ -2,7 +2,7 @@ use crate::JNI::{
     JNI_CreateJavaVM, JNI_FALSE, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
     JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue, va_list,
 };
-use std::ffi::CString;
+use std::{ffi::CString, ops::{Deref, DerefMut}};
 impl JNIEnv {
     pub fn NewObjectA(
         &mut self,
@@ -188,5 +188,17 @@ impl J_class {
         args: *const jvalue,
     ) -> Option<jobject> {
         unsafe { (***self).NewObjectA(self.clazz, methodID, args) }
+    }
+}
+
+impl Deref for J_class {
+    type Target = *mut JNIEnv;
+    fn deref(&self) -> &Self::Target {
+        &self.JNIEnv
+    }
+}
+impl DerefMut for J_class {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.JNIEnv
     }
 }

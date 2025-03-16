@@ -60,17 +60,6 @@ impl DerefMut for Counter {
     }
 }
 
-impl Deref for J_class {
-    type Target = *mut JNIEnv;
-    fn deref(&self) -> &Self::Target {
-        &self.JNIEnv
-    }
-}
-impl DerefMut for J_class {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.JNIEnv
-    }
-}
 
 impl Deref for Counter {
     type Target = J_class;
