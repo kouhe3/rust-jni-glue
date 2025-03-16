@@ -155,8 +155,7 @@ impl J_class {
         sig: &str,
     ) -> Option<jmethodID> {
         unsafe {
-            let r = (***self).GetMethodID(self.clazz, name, sig)?;
-            if r.is_null() { None } else { Some(r) }
+            (***self).GetMethodID(self.clazz, name, sig)
         }
     }
     pub unsafe fn StaticIntMethodA(
@@ -179,8 +178,7 @@ impl J_class {
         sig: &str,
     ) -> Option<jmethodID> {
         unsafe {
-            let r = (***self).GetStaticMethodID(self.clazz, name, sig)?;
-            if r.is_null() { None } else { Some(r) }
+            (***self).GetStaticMethodID(self.clazz, name, sig)
         }
     }
 
