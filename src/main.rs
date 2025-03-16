@@ -49,7 +49,7 @@ fn main() -> ::std::io::Result<()> {
 
         println!("sum is {}", sum);
 
-        let mut zhangsan = Person::new(jenv, "zhangsan", 18).expect("Can not create person");
+        let mut zhangsan = Person::Person(jenv, "zhangsan", 18).expect("Can not create person");
         zhangsan
             .introduce()
             .expect("introduce err");

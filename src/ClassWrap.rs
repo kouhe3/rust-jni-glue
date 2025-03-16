@@ -29,7 +29,7 @@ impl DerefMut for Person {
 }
 
 impl Person {
-    pub fn new(
+    pub fn Person(
         jenv: *mut JNIEnv,
         name: &str,
         age: i32,
