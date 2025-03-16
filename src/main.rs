@@ -45,6 +45,7 @@ fn main() -> ::std::io::Result<()> {
             &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
         );
 
+        Counter::main(jenv, &jvalue { l: null_mut() });
         let sum = Counter::add(jenv, jvalue { i: 1 }, jvalue { i: 2 }).unwrap();
 
         println!("sum is {}", sum);

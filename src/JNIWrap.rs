@@ -186,6 +186,13 @@ impl J_class {
     ) -> Option<jint> {
         unsafe { (***self).CallStaticIntMethodA(self.clazz, methodID, args) }
     }
+    pub unsafe fn StaticVoidMethodA(
+        &mut self,
+        methodID: jmethodID,
+        args: *const jvalue,
+    ) -> Option<()> {
+        unsafe { (***self).CallStaticVoidMethodA(self.clazz, methodID, args) }
+    }
     pub unsafe fn StaticMethodID(
         &mut self,
         name: *const ::std::os::raw::c_char,

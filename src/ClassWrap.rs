@@ -93,4 +93,15 @@ impl Counter {
             Some(r)
         }
     }
+    pub fn main(
+        jenv: *mut JNIEnv,
+        args: *const jvalue,
+    ) -> Option<()> {
+        unsafe {
+            let mut J_class = J_class::new(jenv, "Counter")?;
+            let main = J_class.StaticMethodID(c!("main"), c!("([Ljava/lang/String;)V"))?;
+            J_class.StaticVoidMethodA(main, args)?;
+            Some(())
+        }
+    }
 }
