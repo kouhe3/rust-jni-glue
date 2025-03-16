@@ -20,25 +20,25 @@ impl JNIEnv {
     }
     pub fn FindClass(
         &mut self,
-        name: *const ::std::os::raw::c_char,
+        name: &str,
     ) -> Option<jclass> {
         unsafe {
             let result = self
                 .functions
                 .as_ref()?
-                .FindClass?(self, name);
+                .FindClass?(self, c!(name));
             if result.is_null() { None } else { Some(result) }
         }
     }
     pub fn NewStringUTF(
         &mut self,
-        utf: *const ::std::os::raw::c_char,
+        utf: &str,
     ) -> Option<jstring> {
         unsafe {
             let result = self
                 .functions
                 .as_ref()?
-                .NewStringUTF?(self, utf);
+                .NewStringUTF?(self, c!(utf));
             if result.is_null() { None } else { Some(result) }
         }
     }
@@ -88,14 +88,14 @@ impl JNIEnv {
     pub fn GetStaticMethodID(
         &mut self,
         clazz: jclass,
-        name: *const ::std::os::raw::c_char,
-        sig: *const ::std::os::raw::c_char,
+        name: &str,
+        sig: &str,
     ) -> Option<jmethodID> {
         unsafe {
             let result = self
                 .functions
                 .as_ref()?
-                .GetStaticMethodID?(self, clazz, name, sig);
+                .GetStaticMethodID?(self, clazz, c!(name), c!(sig));
             if result.is_null() { None } else { Some(result) }
         }
     }
@@ -103,27 +103,16 @@ impl JNIEnv {
     pub fn GetMethodID(
         &mut self,
         clazz: jclass,
-        name: *const ::std::os::raw::c_char,
-        sig: *const ::std::os::raw::c_char,
+        name: &str,
+        sig: &str,
     ) -> Option<jmethodID> {
         unsafe {
             let result = self
                 .functions
                 .as_ref()?
-                .GetMethodID?(self, clazz, name, sig);
+                .GetMethodID?(self, clazz, c!(name), c!(sig));
             if result.is_null() { None } else { Some(result) }
         }
-    }
-
-    pub fn new_J_class(
-        &mut self,
-        name: &str,
-    ) -> Option<J_class> {
-        J_class {
-            JNIEnv: self,
-            clazz: self.FindClass(c!(name))?,
-        }
-        .into()
     }
 }
 
@@ -154,7 +143,7 @@ impl J_class {
             J_class {
                 JNIEnv: jenv,
                 clazz: (*jenv)
-                    .FindClass(c!(class_name))
+                    .FindClass(class_name)
                     .expect("Failed FindClass"),
             }
             .into()
@@ -162,8 +151,8 @@ impl J_class {
     }
     pub fn MethodID(
         &mut self,
-        name: *const ::std::os::raw::c_char,
-        sig: *const ::std::os::raw::c_char,
+        name: &str,
+        sig: &str,
     ) -> Option<jmethodID> {
         unsafe {
             let r = (***self).GetMethodID(self.clazz, name, sig)?;
@@ -186,8 +175,8 @@ impl J_class {
     }
     pub unsafe fn StaticMethodID(
         &mut self,
-        name: *const ::std::os::raw::c_char,
-        sig: *const ::std::os::raw::c_char,
+        name: &str,
+        sig: &str,
     ) -> Option<jmethodID> {
         unsafe {
             let r = (***self).GetStaticMethodID(self.clazz, name, sig)?;

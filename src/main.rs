@@ -51,7 +51,7 @@ fn main() -> ::std::io::Result<()> {
         println!("sum is {}", sum);
 
         let name = (*jenv)
-            .NewStringUTF(c!("zhangsan"))
+            .NewStringUTF("zhangsan")
             .unwrap();
         let age: jint = 18;
         let mut zhangsan = Person::new(jenv, jvalue { l: name as jobject }, jvalue { i: age })

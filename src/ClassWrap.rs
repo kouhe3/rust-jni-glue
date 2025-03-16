@@ -36,7 +36,7 @@ impl Person {
     ) -> Option<Self> {
         let mut this_class = J_class::new(jenv, "Person")?;
         let args = [name, age];
-        let this_method = this_class.MethodID(c!("<init>"),c!("(Ljava/lang/String;I)V"))?;
+        let this_method = this_class.MethodID("<init>", "(Ljava/lang/String;I)V")?;
         let man = this_class.ObjectA(this_method, args.as_ptr())?;
         Person {
             J_class: this_class,
@@ -44,9 +44,8 @@ impl Person {
         }
         .into()
     }
-
     pub fn introduce(&mut self) -> Option<()> {
-        let method = self.MethodID(c!("introduce"), c!("()V"))?;
+        let method = self.MethodID("introduce", "()V")?;
         unsafe {
             let args: [jvalue; 0] = [];
             (****self).CallVoidMethodA(self.jobject, method, args.as_ptr())?;
@@ -88,7 +87,7 @@ impl Counter {
     ) -> Option<jint> {
         unsafe {
             let mut this_class = J_class::new(jenv, "Counter")?;
-            let this_method = this_class.StaticMethodID(c!("add"), c!("(II)I"))?;
+            let this_method = this_class.StaticMethodID("add", "(II)I")?;
             let r = this_class.StaticIntMethodA(this_method, [a, b].as_ptr())?;
             Some(r)
         }
@@ -99,7 +98,7 @@ impl Counter {
     ) -> Option<()> {
         unsafe {
             let mut this_class = J_class::new(jenv, "Counter")?;
-            let this_method = this_class.StaticMethodID(c!("main"), c!("([Ljava/lang/String;)V"))?;
+            let this_method = this_class.StaticMethodID("main", "([Ljava/lang/String;)V")?;
             this_class.StaticVoidMethodA(this_method, args)?;
             Some(())
         }
