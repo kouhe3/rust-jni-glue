@@ -149,7 +149,7 @@ impl J_class {
             .into()
         }
     }
-    pub fn MethodID(
+    pub fn GetMethodID(
         &mut self,
         name: &str,
         sig: &str,
@@ -158,21 +158,21 @@ impl J_class {
             (***self).GetMethodID(self.clazz, name, sig)
         }
     }
-    pub unsafe fn StaticIntMethodA(
+    pub unsafe fn CallStaticIntMethodA(
         &mut self,
         methodID: jmethodID,
         args: *const jvalue,
     ) -> Option<jint> {
         unsafe { (***self).CallStaticIntMethodA(self.clazz, methodID, args) }
     }
-    pub unsafe fn StaticVoidMethodA(
+    pub unsafe fn CallStaticVoidMethodA(
         &mut self,
         methodID: jmethodID,
         args: *const jvalue,
     ) -> Option<()> {
         unsafe { (***self).CallStaticVoidMethodA(self.clazz, methodID, args) }
     }
-    pub unsafe fn StaticMethodID(
+    pub unsafe fn GetStaticMethodID(
         &mut self,
         name: &str,
         sig: &str,
@@ -182,7 +182,7 @@ impl J_class {
         }
     }
 
-    pub fn ObjectA(
+    pub fn NewObjectA(
         &mut self,
         methodID: jmethodID,
         args: *const jvalue,
