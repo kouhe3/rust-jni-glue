@@ -31,18 +31,24 @@ impl DerefMut for Person {
 impl Person {
     pub fn new(
         jenv: *mut JNIEnv,
-        name: jvalue,
-        age: jvalue,
+        name: &str,
+        age: i32,
     ) -> Option<Self> {
-        let mut this_class = J_class::new_FindClass(jenv, "Person")?;
-        let args = [name, age];
-        let this_method = this_class.GetMethodID("<init>", "(Ljava/lang/String;I)V")?;
-        let man = this_class.NewObjectA(this_method, args.as_ptr())?;
-        Person {
-            J_class: this_class,
-            jobject: man,
+        unsafe {
+            let mut this_class = J_class::new_FindClass(jenv, "Person")?;
+            let name = jvalue {
+                l: (*jenv).NewStringUTF(name)? as jobject,
+            };
+            let age = jvalue { i: age };
+            let args = [name, age];
+            let this_method = this_class.GetMethodID("<init>", "(Ljava/lang/String;I)V")?;
+            let man = this_class.NewObjectA(this_method, args.as_ptr())?;
+            Person {
+                J_class: this_class,
+                jobject: man,
+            }
+            .into()
         }
-        .into()
     }
     pub fn introduce(&mut self) -> Option<()> {
         let method = self.GetMethodID("introduce", "()V")?;
@@ -83,10 +89,10 @@ impl Counter {
         jenv: *mut JNIEnv,
         args: *const jvalue,
     ) -> Option<()> {
-            let mut this_class = J_class::new_FindClass(jenv, "Counter")?;
-            let mut this_method = J_methodid::new_GetStaticMethodID(&mut this_class,"main", "([Ljava/lang/String;)V")?;
-            this_method.CallStaticVoidMethodA(args);
-            Some(())
-        
+        let mut this_class = J_class::new_FindClass(jenv, "Counter")?;
+        let mut this_method =
+            J_methodid::new_GetStaticMethodID(&mut this_class, "main", "([Ljava/lang/String;)V")?;
+        this_method.CallStaticVoidMethodA(args);
+        Some(())
     }
 }

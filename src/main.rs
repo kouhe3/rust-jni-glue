@@ -50,12 +50,7 @@ fn main() -> ::std::io::Result<()> {
 
         println!("sum is {}", sum);
 
-        let name = (*jenv)
-            .NewStringUTF("zhangsan")
-            .unwrap();
-        let age: jint = 18;
-        let mut zhangsan = Person::new(jenv, jvalue { l: name as jobject }, jvalue { i: age })
-            .expect("Can not create person");
+        let mut zhangsan = Person::new(jenv, "zhangsan", 18).expect("Can not create person");
         zhangsan
             .introduce()
             .expect("introduce err");
