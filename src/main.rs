@@ -3,7 +3,6 @@
 #![allow(non_snake_case)]
 #![allow(dead_code)]
 #![allow(unused_imports)]
-#![feature(c_variadic)]
 #[macro_use]
 mod macros;
 use std::{
