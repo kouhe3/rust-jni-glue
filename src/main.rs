@@ -23,18 +23,9 @@ mod JNIWrap;
 use JNIWrap::{CreateJavaWrapper, JavaVMWrapper};
 
 fn main() -> ::std::io::Result<()> {
-    let optionString = c!(r"-Djava.class.path=.");
-    let mut options = JavaVMOption {
-        extraInfo: std::ptr::null_mut(),
-        optionString,
-    };
-    let mut vm_args: JavaVMInitArgs = JavaVMInitArgs {
-        version: JNI_VERSION_21 as i32,
-        nOptions: 1,
-        options: &mut options,
-        ignoreUnrecognized: JNI_FALSE as u8,
-    };
-
+    let mut options = JavaVMOption::new(r"-Djava.class.path=.");
+    let mut vm_args: JavaVMInitArgs =
+        JavaVMInitArgs::new(JNI_VERSION_21, 1, &mut options, JNI_TRUE);
     let (mut jvm, mut jenv) = CreateJavaWrapper(vm_args);
     jvm.DestroyJavaVM();
     Ok(())

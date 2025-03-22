@@ -24,7 +24,29 @@ pub fn CreateJavaWrapper(mut vm_args: JavaVMInitArgs) -> (JavaVMWrapper, JavaENV
         (jvm, jenv)
     }
 }
-
+impl JavaVMOption {
+    pub fn new(optionString: &str) -> Self {
+        JavaVMOption {
+            extraInfo: std::ptr::null_mut(),
+            optionString: c!(optionString),
+        }
+    }
+}
+impl JavaVMInitArgs {
+    pub fn new(
+        version: u32,
+        nOptions: i32,
+        options: &mut JavaVMOption,
+        ignoreUnrecognized: u32,
+    ) -> Self {
+        JavaVMInitArgs {
+            version: version as i32,
+            nOptions,
+            options,
+            ignoreUnrecognized: ignoreUnrecognized as u8,
+        }
+    }
+}
 pub struct JavaENVWrapper(*mut JNIEnv);
 impl JavaENVWrapper {
     pub fn new(pjenv: *mut JNIEnv) -> Self {
