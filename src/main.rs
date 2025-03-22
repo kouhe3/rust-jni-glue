@@ -35,7 +35,7 @@ fn main() -> ::std::io::Result<()> {
         ignoreUnrecognized: JNI_FALSE as u8,
     };
 
-    let (jvm, jenv) = CreateJavaWrapper(vm_args);
-
+    let (mut jvm, mut jenv) = CreateJavaWrapper(vm_args);
+    jvm.DestroyJavaVM();
     Ok(())
 }
