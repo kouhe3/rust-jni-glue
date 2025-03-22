@@ -6,8 +6,60 @@ use crate::JNI::{
 use std::{
     ffi::CString,
     ops::{Deref, DerefMut},
+    os::raw::c_void,
     ptr::null_mut,
 };
+
+pub fn CreateJavaWrapper(mut vm_args: JavaVMInitArgs) -> (JavaVMWrapper, JavaENVWrapper) {
+    let mut pjvm = null_mut::<JavaVM>();
+    let mut pjenv = null_mut::<JNIEnv>();
+    unsafe {
+        JNI_CreateJavaVM(
+            &mut pjvm,
+            &mut pjenv as *mut *mut JNIEnv as *mut *mut c_void,
+            &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
+        );
+        let jvm = JavaVMWrapper::new(pjvm);
+        let jenv = JavaENVWrapper::new(pjenv);
+        (jvm, jenv)
+    }
+}
+
+pub struct JavaENVWrapper(*mut JNIEnv);
+impl JavaENVWrapper {
+    pub fn new(pjenv: *mut JNIEnv) -> Self {
+        JavaENVWrapper(pjenv)
+    }
+}
+impl Deref for JavaENVWrapper {
+    type Target = JNIEnv;
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*self.0 }
+    }
+}
+impl DerefMut for JavaENVWrapper {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { &mut *self.0 }
+    }
+}
+pub struct JavaVMWrapper(*mut JavaVM);
+impl JavaVMWrapper {
+    pub fn new(pjvm: *mut JavaVM) -> Self {
+        JavaVMWrapper(pjvm)
+    }
+}
+impl Deref for JavaVMWrapper {
+    type Target = JavaVM;
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*self.0 }
+    }
+}
+impl DerefMut for JavaVMWrapper {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe { &mut *self.0 }
+    }
+}
+
 impl JNIEnv {
     pub fn NewObjectA(
         &mut self,

@@ -20,6 +20,7 @@ use JNI::{
 mod ClassWrap;
 use ClassWrap::{Counter, Person};
 mod JNIWrap;
+use JNIWrap::{CreateJavaWrapper, JavaVMWrapper};
 
 fn main() -> ::std::io::Result<()> {
     let optionString = c!(r"-Djava.class.path=.");
@@ -33,29 +34,8 @@ fn main() -> ::std::io::Result<()> {
         options: &mut options,
         ignoreUnrecognized: JNI_FALSE as u8,
     };
-    let mut jvm = null_mut::<JavaVM>();
 
-    let mut jenv = null_mut::<JNIEnv>();
+    let (jvm, jenv) = CreateJavaWrapper(vm_args);
 
-    unsafe {
-        JNI_CreateJavaVM(
-            &mut jvm,
-            &mut jenv as *mut *mut JNIEnv as *mut *mut c_void,
-            &mut vm_args as *mut JavaVMInitArgs as *mut c_void,
-        );
-        Counter::main(jenv, &[]);
-        let sum = Counter::add(jenv, 1, 2).unwrap();
-
-        println!("sum is {}", sum);
-
-        let mut zhangsan = Person::Person(jenv, "zhangsan", 18).expect("Can not create person");
-        zhangsan
-            .introduce()
-            .expect("introduce err");
-
-        (*jvm)
-            .DestroyJavaVM()
-            .expect("Destroy JVM err");
-    }
     Ok(())
 }
