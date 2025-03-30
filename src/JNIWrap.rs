@@ -1,3 +1,5 @@
+use jnibind::jni_method;
+
 use crate::JNI::{
     self, JNI_CreateJavaVM, JNI_FALSE, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM,
     JavaVMInitArgs, JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue,
@@ -83,20 +85,8 @@ impl DerefMut for JavaVMWrapper {
 }
 
 impl JNIEnv {
-    pub fn NewObjectA(
-        &mut self,
-        clazz: jclass,
-        methodID: jmethodID,
-        args: *const jvalue,
-    ) -> Option<jobject> {
-        unsafe {
-            let result = self
-                .functions
-                .as_ref()?
-                .NewObjectA?(self, clazz, methodID, args);
-            if result.is_null() { None } else { Some(result) }
-        }
-    }
+    jni_method!(NewObjectA: (jclass, jmethodID, *const jvalue) -> Option<jobject>  );
+
     pub fn FindClass(
         &mut self,
         name: &str,
