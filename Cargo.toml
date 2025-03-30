@@ -2,7 +2,13 @@
 name = "jnibind"
 version = "0.1.0"
 edition = "2024"
-
 [dependencies]
+quote = "1.0.40"
+proc-macro2 = "*"
+syn = {"version" = "*",features = ["full"]}
+syn_derive = "*"
 [build-dependencies]
 bindgen = "*"
+[lib]
+proc-macro = true
+
