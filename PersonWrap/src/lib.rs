@@ -6,7 +6,10 @@ macro_rules! c {
 
 use JNIWrap::JNI::{JNIEnv, jobject, jvalue};
 
-pub struct Person(jobject);
+pub struct Person{
+    pub obj: jobject,
+    pub env: *mut JNIEnv,
+}
 impl Person {
     pub fn new(jenv: *mut JNIEnv, name: &str, age: i32) -> Option<Self> {
         unsafe {
@@ -20,15 +23,18 @@ impl Person {
             if p.is_null() {
                 return None;
             }
-            Some(Self(p))
+            Some(Self{
+                obj: p,
+                env: jenv,
+            })
         }
     }
-    pub fn introduce(&mut self, jenv: *mut JNIEnv) -> Option<()> {
+    pub fn introduce(&mut self) -> Option<()> {
         unsafe {
-            let class = (*jenv).GetObjectClass(self.0)?;
-            let obj = self.0;
+            let jenv = self.env;
+            let class = (*jenv).GetObjectClass(self.obj)?;
             let method = (*jenv).GetMethodID(class, c!("introduce"), c!("()V"))?;
-            (*jenv).CallVoidMethodA(obj, method, std::ptr::null())?;
+            (*jenv).CallVoidMethodA(self.obj, method, std::ptr::null())?;
             Some(())
         }
     }

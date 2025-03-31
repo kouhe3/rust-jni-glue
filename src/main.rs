@@ -7,7 +7,7 @@ fn main() {
     let vmargs = JavaVMInitArgs::new(JNI_VERSION_21, 1, &mut vmoptions, true);
     let (mut jvm, mut jenv) = CreateJavaWrapper(vmargs);
     let mut zhangsan = Person::new(jenv, "zhangsan", 18).unwrap();
-    zhangsan.introduce(jenv).unwrap();
+    zhangsan.introduce().unwrap();
     unsafe {
         (*jvm).DestroyJavaVM();
     }
