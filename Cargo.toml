@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [workspace]
-members = ["jnimacro","JNIWrap","PersonWrap"]
+members = ["jnimacro","JNIWrap","PersonWrap", "CounterWrap"]
 [dependencies]
 PersonWrap = { path = "PersonWrap" }
 JNIWrap = { path = "JNIWrap" }
 jnimacro = { path = "jnimacro" }
+CounterWrap = { path = "CounterWrap" }

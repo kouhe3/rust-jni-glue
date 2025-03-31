@@ -3,6 +3,13 @@
 version = 4
 
 [[package]]
+name = "CounterWrap"
+version = "0.1.0"
+dependencies = [
+ "JNIWrap",
+]
+
+[[package]]
 name = "JNIWrap"
 version = "0.1.0"
 dependencies = [
@@ -235,6 +242,7 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 name = "rust-jni-glue"
 version = "0.1.0"
 dependencies = [
+ "CounterWrap",
  "JNIWrap",
  "PersonWrap",
  "jnimacro",
