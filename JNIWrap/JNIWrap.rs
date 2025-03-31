@@ -1,3 +1,4 @@
+#![allow(non_snake_case)]
 macro_rules! c {
     ($s:expr) => {
         CString::new($s).unwrap().into_raw()
@@ -8,12 +9,11 @@ use jnimacro::jni_method;
 pub mod JNI;
 
 use JNI::{
-    JNI_CreateJavaVM, JNI_FALSE, JNI_OK, JNI_TRUE, JNI_VERSION_21, JNIEnv, JavaVM, JavaVMInitArgs,
-    JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue, va_list,
+    JNI_CreateJavaVM, JNIEnv, JavaVM, JavaVMInitArgs,
+    JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue,
 };
 use std::{
     ffi::CString,
-    ops::{Deref, DerefMut},
     os::raw::c_void,
     ptr::null_mut,
 };
