@@ -9,14 +9,10 @@ use jnimacro::jni_method;
 pub mod JNI;
 
 use JNI::{
-    JNI_CreateJavaVM, JNIEnv, JavaVM, JavaVMInitArgs,
-    JavaVMOption, jclass, jfieldID, jint, jmethodID, jobject, jstring, jvalue,
+    JNI_CreateJavaVM, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption, jclass, jfieldID, jint,
+    jmethodID, jobject, jstring, jvalue,
 };
-use std::{
-    ffi::CString,
-    os::raw::c_void,
-    ptr::null_mut,
-};
+use std::{ffi::CString, os::raw::c_void, ptr::null_mut};
 
 pub fn CreateJavaWrapper(mut vm_args: JavaVMInitArgs) -> (*mut JavaVM, *mut JNIEnv) {
     let mut pjvm = null_mut::<JavaVM>();
@@ -73,7 +69,7 @@ impl JavaVM {
 }
 
 impl jvalue {
-    pub fn str(pjenv: *mut JNIEnv, s: &str) -> Option<jvalue> {
+    pub unsafe fn str(pjenv: *mut JNIEnv, s: &str) -> Option<jvalue> {
         Some(jvalue {
             l: unsafe { (*pjenv).NewStringUTF(c!(s))? as jobject },
         })

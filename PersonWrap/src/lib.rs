@@ -6,12 +6,12 @@ macro_rules! c {
 
 use JNIWrap::JNI::{JNIEnv, jobject, jvalue};
 
-pub struct Person{
+pub struct Person {
     pub obj: jobject,
     pub env: *mut JNIEnv,
 }
 impl Person {
-    pub fn new(jenv: *mut JNIEnv, name: &str, age: i32) -> Option<Self> {
+    pub unsafe fn new(jenv: *mut JNIEnv, name: &str, age: i32) -> Option<Self> {
         unsafe {
             let class = (*jenv).FindClass(c!("Person"))?;
             let constructor =
@@ -23,13 +23,10 @@ impl Person {
             if p.is_null() {
                 return None;
             }
-            Some(Self{
-                obj: p,
-                env: jenv,
-            })
+            Some(Self { obj: p, env: jenv })
         }
     }
-    pub fn introduce(&mut self) -> Option<()> {
+    pub unsafe fn introduce(&mut self) -> Option<()> {
         unsafe {
             let jenv = self.env;
             let class = (*jenv).GetObjectClass(self.obj)?;

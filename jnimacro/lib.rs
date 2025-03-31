@@ -11,12 +11,12 @@ impl FnStruct {
     pub fn expand(&self) -> TokenStream {
         let name = &self.fn_name;
         let ret = &self.args.output;
-        let ident = Ident::new("n", Span::call_site().into());
+        let ident = Ident::new("n", Span::call_site());
         let types = self.args.inputs.iter();
         let idents = (0..types.len()).map(|i| format_ident!("{}{}", ident, i));
         let idents_clone = idents.clone();
         quote! {
-            pub fn #name(&mut self,#(#idents: #types),*) #ret{
+            pub unsafe fn #name(&mut self,#(#idents: #types),*) #ret{
                 unsafe {
                     let r = self.functions
                         .as_ref()?
