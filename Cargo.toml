@@ -1,0 +1,11 @@
+[package]
+name = "rust-jni-glue"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+members = ["jnimacro","JNIWrap","PersonWrap"]
+[dependencies]
+PersonWrap = { path = "PersonWrap" }
+JNIWrap = { path = "JNIWrap" }
+jnimacro = { path = "jnimacro" }
