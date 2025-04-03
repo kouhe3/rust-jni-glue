@@ -1,9 +1,4 @@
 #![allow(non_snake_case)]
-macro_rules! c {
-    ($s:expr) => {
-        CString::new($s).unwrap().into_raw()
-    };
-}
 use jnimacro::jni_method;
 pub mod JNI;
 
@@ -27,10 +22,10 @@ pub fn CreateJavaWrapper(mut vm_args: JavaVMInitArgs) -> (*mut JavaVM, *mut JNIE
     }
 }
 impl JavaVMOption {
-    pub fn new(optionString: &str) -> Self {
+    pub fn new(s: &str) -> Self {
         JavaVMOption {
             extraInfo: std::ptr::null_mut(),
-            optionString: c!(optionString),
+            optionString: CString::new(s).unwrap().into_raw(),
         }
     }
 }
@@ -70,7 +65,7 @@ impl JavaVM {
 impl jvalue {
     pub unsafe fn str(pjenv: *mut JNIEnv, s: &str) -> jvalue {
         jvalue {
-            l: unsafe { (*pjenv).NewStringUTF(c!(s)).unwrap() as jobject },
+            l: unsafe { (*pjenv).NewStringUTF(CString::new(s).unwrap().as_ptr()).unwrap() as jobject },
         }
     }
     pub fn jint(i: jint) -> jvalue {
