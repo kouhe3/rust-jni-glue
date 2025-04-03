@@ -7,6 +7,7 @@ name = "CounterWrap"
 version = "0.1.0"
 dependencies = [
  "JNIWrap",
+ "jnimacro",
 ]
 
 [[package]]

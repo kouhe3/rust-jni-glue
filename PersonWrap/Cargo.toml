@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 JNIWrap = { path = "../JNIWrap" }
+jnimacro = {path = "../jnimacro"}
