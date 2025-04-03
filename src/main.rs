@@ -14,8 +14,11 @@ fn main() -> std::io::Result<()> {
     }
     .unwrap();
     unsafe {
-        Counter::main(jenv, &["x"]);
-        println!("5+8={}", Counter::add(jenv, 5, 8).unwrap());
+        Counter::main(jenv, [jvalue::str(jenv, "")].as_ptr());
+        println!(
+            "5+8={}",
+            Counter::add(jenv, [jvalue::jint(5), jvalue::jint(8)].as_ptr()).unwrap()
+        );
         zhangsan.introduce(jenv, std::ptr::null());
         (*jvm).DestroyJavaVM();
     }
