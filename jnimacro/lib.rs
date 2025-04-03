@@ -44,10 +44,8 @@ struct ConstructorBodyInput {
     jenv: Expr,
     _comma1: Token![,],
     args: Expr,
-
     _comma2: Token![,],
     class_name: LitStr,
-
     _comma3: Token![,],
     descriptor: LitStr,
 }
@@ -55,16 +53,12 @@ struct ConstructorBodyInput {
 #[derive(Parse)]
 struct VoidMethodBodyInput {
     self_expr: Expr,
-    #[allow(dead_code)]
     _comma1: Token![,],
     jenv: Expr,
-    #[allow(dead_code)]
     _comma2: Token![,],
     args: Expr,
-    #[allow(dead_code)]
     _comma3: Token![,],
     method_name: LitStr,
-    #[allow(dead_code)]
     _comma4: Token![,],
     descriptor: LitStr,
 }
@@ -98,7 +92,6 @@ pub fn jni_void_method_body(input: Tok1) -> Tok1 {
     let args = input.args;
     let method_name_str = input.method_name.value();
     let descriptor_str = input.descriptor.value();
-
     let x = quote! {
             unsafe {
             let jenv_ptr = #jenv;
@@ -110,6 +103,5 @@ pub fn jni_void_method_body(input: Tok1) -> Tok1 {
             Some(()) // Return Some(()) on success for Option<()>
         }
     };
-
     Tok1::from(x)
 }
