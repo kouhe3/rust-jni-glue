@@ -47,18 +47,29 @@ struct ConstructorBodyInput {
 }
 
 #[derive(Parse)]
-struct VoidMethodBodyInput {
-    self_expr: Expr,
-    _comma1: Token![,],
+struct MethodBodyInput {
     jenv: Expr,
-    _comma2: Token![,],
+    _comma1: Token![,],
     args: Expr,
+    _comma2: Token![,],
+    obj: Expr,
+    _comma4: Token![,],
+    method_name: LitStr,
+    _comma: Token![,],
+    descriptor: LitStr,
+}
+#[derive(Parse)]
+struct StaticMethodBodyInput {
+    jenv: Expr,
+    _comma1: Token![,],
+    args: Expr,
+    _comma2: Token![,],
+    class_name: LitStr,
     _comma3: Token![,],
     method_name: LitStr,
     _comma4: Token![,],
     descriptor: LitStr,
 }
-
 #[proc_macro]
 pub fn jni_constructor_body(input: Tok1) -> Tok1 {
     let input = parse_macro_input!(input as ConstructorBodyInput);
@@ -83,25 +94,62 @@ pub fn jni_constructor_body(input: Tok1) -> Tok1 {
 }
 
 #[proc_macro]
-pub fn jni_void_method_body(input: Tok1) -> Tok1 {
-    let input = parse_macro_input!(input as VoidMethodBodyInput);
-    let self_expr = input.self_expr;
+pub fn jni_method_body(input: Tok1) -> Tok1 {
+    let input = parse_macro_input!(input as MethodBodyInput);
+    let obj = input.obj;
     let jenv = input.jenv;
     let args = input.args;
     let method_name = input.method_name;
     let descriptor = input.descriptor;
+    let return_type = return_type(descriptor.value());
+    let identname = format_ident!("Call{}MethodA", return_type);
     let x = quote! {
         unsafe {
             let method_name_cstr = ::std::ffi::CString::new(#method_name).expect("Invalid method name string literal");
             let descriptor_cstr = ::std::ffi::CString::new(#descriptor).expect("Invalid descriptor string literal");
             let jenv_ptr = #jenv;
             let args_ptr = #args;
-            let self_obj = (#self_expr).0;
+            let self_obj = #obj;
             let class = (*jenv_ptr).GetObjectClass(self_obj)?;
             let method_id = (*jenv_ptr).GetMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
-            (*jenv_ptr).CallVoidMethodA(self_obj, method_id, args_ptr)?;
-            Some(())
+            let r = (*jenv_ptr).#identname(self_obj, method_id, args_ptr)?;
+            Some(r)
         }
     };
     Tok1::from(x)
+}
+
+#[proc_macro]
+pub fn jni_static_method_body(input: Tok1) -> Tok1 {
+    let input = parse_macro_input!(input as StaticMethodBodyInput);
+    let jenv = input.jenv;
+    let args = input.args;
+    let class_name = input.class_name;
+    let method_name = input.method_name;
+    let descriptor = input.descriptor;
+    let return_type = return_type(descriptor.value());
+    let identname = format_ident!("CallStatic{}MethodA", return_type);
+    let x = quote! {
+        unsafe {
+            let class_name_cstr = ::std::ffi::CString::new(#class_name).expect("Invalid class name string literal");
+            let method_name_cstr = ::std::ffi::CString::new(#method_name).expect("Invalid method name string literal");
+            let descriptor_cstr = ::std::ffi::CString::new(#descriptor).expect("Invalid descriptor string literal");
+            let jenv_ptr = #jenv;
+            let args_ptr = #args;
+            let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr())?;
+            let method_id = (*jenv_ptr).GetStaticMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
+
+            let r = (*jenv_ptr).#identname(class, method_id, args_ptr)?;
+            Some(r)
+        }
+    };
+    Tok1::from(x)
+}
+
+fn return_type(descriptor: String) -> &'static str {
+    match descriptor.chars().last() {
+        Some('I') => "Int",
+        Some('V') => "Void",
+        _ => panic!("Invalid return type"),
+    }
 }
