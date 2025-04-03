@@ -1,9 +1,3 @@
-macro_rules! c {
-    ($s:expr) => {
-        ::std::ffi::CString::new($s).unwrap().into_raw()
-    };
-}
-
 use JNIWrap::JNI::{JNIEnv, jobject, jvalue};
 use jnimacro::*;
 pub struct Person(jobject);

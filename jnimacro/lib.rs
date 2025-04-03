@@ -3,11 +3,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
 use syn::{Expr, Ident, LitStr, ParenthesizedGenericArguments, Token, parse_macro_input};
 use syn_derive::Parse;
-macro_rules! c {
-    ($s:expr) => {
-        ::std::ffi::CString::new($s).unwrap().into_raw()
-    };
-}
+
 #[derive(Parse)]
 struct FnStruct {
     fn_name: Ident,
@@ -68,15 +64,17 @@ pub fn jni_constructor_body(input: Tok1) -> Tok1 {
     let input = parse_macro_input!(input as ConstructorBodyInput);
     let jenv = input.jenv;
     let args = input.args;
-    let class_name_str = input.class_name.value();
-    let descriptor_str = input.descriptor.value();
-    let constructor_name_str = "<init>";
+    let class_name_str = input.class_name;
+    let descriptor_str = input.descriptor;
     let x = quote! {
         unsafe{
             let jenv_ptr = #jenv;
             let args_ptr = #args;
-            let class = (*jenv_ptr).FindClass(c!(#class_name_str))?;
-            let method_id = (*jenv_ptr).GetMethodID(class, c!(#constructor_name_str), c!(#descriptor_str))?;
+            let class_name_cstr = ::std::ffi::CString::new(#class_name_str).expect("Invalid class name literal provided to jni_constructor_body");
+            let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr())?;
+            let constructor_name_cstr = ::std::ffi::CString::new("<init>").unwrap();
+            let descriptor_cstr = ::std::ffi::CString::new(#descriptor_str).expect("Invalid descriptor literal provided to jni_constructor_body");
+            let method_id = (*jenv_ptr).GetMethodID(class, constructor_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
             let obj = (*jenv_ptr).NewObjectA(class, method_id, args_ptr)?;
             Some(Self(obj))
         }
@@ -90,17 +88,19 @@ pub fn jni_void_method_body(input: Tok1) -> Tok1 {
     let self_expr = input.self_expr;
     let jenv = input.jenv;
     let args = input.args;
-    let method_name_str = input.method_name.value();
-    let descriptor_str = input.descriptor.value();
+    let method_name = input.method_name;
+    let descriptor = input.descriptor;
     let x = quote! {
-            unsafe {
+        unsafe {
+            let method_name_cstr = ::std::ffi::CString::new(#method_name).expect("Invalid method name string literal");
+            let descriptor_cstr = ::std::ffi::CString::new(#descriptor).expect("Invalid descriptor string literal");
             let jenv_ptr = #jenv;
             let args_ptr = #args;
             let self_obj = (#self_expr).0;
             let class = (*jenv_ptr).GetObjectClass(self_obj)?;
-            let method_id = (*jenv_ptr).GetMethodID(class, c!(#method_name_str), c!(#descriptor_str))?;
+            let method_id = (*jenv_ptr).GetMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
             (*jenv_ptr).CallVoidMethodA(self_obj, method_id, args_ptr)?;
-            Some(()) // Return Some(()) on success for Option<()>
+            Some(())
         }
     };
     Tok1::from(x)
