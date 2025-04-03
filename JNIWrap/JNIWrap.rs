@@ -69,16 +69,16 @@ impl JavaVM {
 }
 
 impl jvalue {
-    pub unsafe fn str(pjenv: *mut JNIEnv, s: &str) -> Option<jvalue> {
-        Some(jvalue {
-            l: unsafe { (*pjenv).NewStringUTF(c!(s))? as jobject },
-        })
+    pub unsafe fn str(pjenv: *mut JNIEnv, s: &str) -> jvalue {
+        jvalue {
+            l: unsafe { (*pjenv).NewStringUTF(c!(s)).unwrap() as jobject },
+        }
     }
-    pub fn jint(i: jint) -> Option<jvalue> {
-        Some(jvalue { i })
+    pub fn jint(i: jint) -> jvalue {
+        jvalue { i }
     }
 
-    pub fn null() -> Option<jvalue> {
-        Some(jvalue { l: null_mut() })
+    pub fn null() -> jvalue {
+        jvalue { l: null_mut() }
     }
 }
