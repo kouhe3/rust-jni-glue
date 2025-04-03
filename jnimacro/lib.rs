@@ -25,8 +25,7 @@ impl FnStruct {
         quote! {
             pub unsafe fn #name(&mut self,#(#idents: #types),*) #ret{
                 unsafe {
-                    let r = self.functions
-                        .as_ref()?
+                    let r = (*self.functions)
                         .#name?(self,#(#idents_clone),*);
                     Some(r)
                 }
