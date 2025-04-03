@@ -4,12 +4,11 @@ macro_rules! c {
         CString::new($s).unwrap().into_raw()
     };
 }
-
 use jnimacro::jni_method;
 pub mod JNI;
 
 use JNI::{
-    JNI_CreateJavaVM, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption, jclass, jfieldID, jint,
+    JNI_CreateJavaVM, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption, jclass, jfieldID, jint, jlong,
     jmethodID, jobject, jstring, jvalue,
 };
 use std::{ffi::CString, os::raw::c_void, ptr::null_mut};
@@ -77,7 +76,9 @@ impl jvalue {
     pub fn jint(i: jint) -> jvalue {
         jvalue { i }
     }
-
+    pub fn jlong(j: jlong) -> jvalue {
+        jvalue { j }
+    }
     pub fn null() -> jvalue {
         jvalue { l: null_mut() }
     }
