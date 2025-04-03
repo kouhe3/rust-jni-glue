@@ -15,7 +15,7 @@ impl Counter{
         unsafe{
             let class = (*jenv).FindClass(c!("Counter"))?;
             let method = (*jenv).GetStaticMethodID(class, c!("add"), c!("(II)I"))?;
-            let jvalue_list = [jvalue::jint(a)?, jvalue::jint(b)?];
+            let jvalue_list = [jvalue::jint(a), jvalue::jint(b)];
             (*jenv).CallStaticIntMethodA(class, method, jvalue_list.as_ptr()).map(|x| x as i32)
             
         }
@@ -25,7 +25,7 @@ impl Counter{
         unsafe {
             let class = (*jenv).FindClass(c!("Counter"))?;
             let method = (*jenv).GetStaticMethodID(class, c!("main"), c!("([Ljava/lang/String;)V"))?;
-            let jvalue_list: Vec<jvalue> = args.iter().map(|s| unsafe{jvalue::str(jenv, s)}).filter_map(|f| f).collect();
+            let jvalue_list: Vec<jvalue> = args.iter().map(|s| unsafe{jvalue::str(jenv, s)}).filter_map(|f| Some(f)).collect();
             (*jenv).CallStaticVoidMethodA(class, method, jvalue_list.as_ptr())
 
         }
