@@ -63,17 +63,30 @@ impl JavaVM {
 }
 
 impl jvalue {
+    /// 创建一个包含 Java 字符串的 `jvalue`。
+    ///
+    /// # Safety
+    /// - `pjenv` 必须是一个有效的 `JNIEnv` 指针。
+    /// - `s` 必须是一个有效的 UTF-8 字符串。
+    /// - 调用者必须确保 `pjenv` 指向的 JNI 环境是有效的，并且当前线程已附加到 JVM。
+    /// - 返回的 `jstring` 是一个本地引用，调用者需要确保在调用后正确管理其生命周期。
     pub unsafe fn str(pjenv: *mut JNIEnv, s: &str) -> jvalue {
         jvalue {
             l: unsafe { (*pjenv).NewStringUTF(CString::new(s).unwrap().as_ptr()).unwrap() as jobject },
         }
     }
+
+    /// 创建一个包含 `jint` 的 `jvalue`。
     pub fn jint(i: jint) -> jvalue {
         jvalue { i }
     }
+
+    /// 创建一个包含 `jlong` 的 `jvalue`。
     pub fn jlong(j: jlong) -> jvalue {
         jvalue { j }
     }
+
+    /// 创建一个空的 `jvalue`（表示 `null`）。
     pub fn null() -> jvalue {
         jvalue { l: null_mut() }
     }
