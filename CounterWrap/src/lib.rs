@@ -5,7 +5,7 @@ pub struct Counter {
     pub env: *mut JNIEnv,
 }
 impl Counter {
-    pub unsafe fn add(jenv: *mut JNIEnv, args: *const jvalue) -> Option<i32> {
+    pub unsafe fn add(jenv: *mut JNIEnv, args: *const jvalue) -> Option<jint> {
         jni_static_method_body!(jenv, args, "Counter", "add", "(II)I")
     }
     pub unsafe fn main(jenv: *mut JNIEnv, args: *const jvalue) -> Option<()> {

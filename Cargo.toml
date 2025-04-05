@@ -8,5 +8,4 @@ members = ["jnimacro","JNIWrap","PersonWrap", "CounterWrap"]
 [dependencies]
 PersonWrap = { path = "PersonWrap" }
 JNIWrap = { path = "JNIWrap" }
-jnimacro = { path = "jnimacro" }
 CounterWrap = { path = "CounterWrap" }

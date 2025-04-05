@@ -247,7 +247,6 @@ dependencies = [
  "CounterWrap",
  "JNIWrap",
  "PersonWrap",
- "jnimacro",
 ]
 
 [[package]]
