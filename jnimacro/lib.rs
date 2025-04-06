@@ -160,10 +160,19 @@ pub fn jni_constructor_body(input: Tok1) -> Tok1 {
             let args_ptr = #args;
             let class_name_cstr = ::std::ffi::CString::new(#class_name_str).expect("Invalid class name literal provided to jni_constructor_body");
             let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr())?;
+            if class.is_null() {
+                return None;
+            }
             let constructor_name_cstr = ::std::ffi::CString::new("<init>").unwrap();
             let descriptor_cstr = ::std::ffi::CString::new(#descriptor_str).expect("Invalid descriptor literal provided to jni_constructor_body");
             let method_id = (*jenv_ptr).GetMethodID(class, constructor_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
+            if method_id.is_null() {
+                return None;
+            }
             let obj = (*jenv_ptr).NewObjectA(class, method_id, args_ptr)?;
+            if obj.is_null() {
+                return None;
+            }
             Some(Self(obj))
         }
     };
@@ -206,7 +215,13 @@ pub fn jni_method_body(input: Tok1) -> Tok1 {
             let args_ptr = #args;
             let self_obj = #obj;
             let class = (*jenv_ptr).GetObjectClass(self_obj)?;
+            if class.is_null() {
+                return None;
+            }
             let method_id = (*jenv_ptr).GetMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
+            if method_id.is_null() {
+                return None;
+            }
             let r = (*jenv_ptr).#identname(self_obj, method_id, args_ptr)?;
             Some(r)
         }
@@ -250,8 +265,13 @@ pub fn jni_static_method_body(input: Tok1) -> Tok1 {
             let jenv_ptr = #jenv;
             let args_ptr = #args;
             let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr())?;
+            if class.is_null() {
+                return None;
+            }
             let method_id = (*jenv_ptr).GetStaticMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
-
+            if method_id.is_null() {
+                return None;
+            }
             let r = (*jenv_ptr).#identname(class, method_id, args_ptr)?;
             Some(r)
         }
