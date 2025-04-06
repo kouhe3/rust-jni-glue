@@ -1,9 +1,6 @@
 use JNIWrap::JNI::{JNIEnv, jint, jobject, jvalue};
 use jnimacro::*;
-pub struct Counter {
-    pub obj: jobject,
-    pub env: *mut JNIEnv,
-}
+pub struct Counter(jobject);
 impl Counter {
     pub unsafe fn add(jenv: *mut JNIEnv, args: *const jvalue) -> Option<jint> {
         jni_static_method_body!(jenv, args, "Counter", "add", "(II)I")
