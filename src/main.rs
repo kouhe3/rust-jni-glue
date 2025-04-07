@@ -11,13 +11,12 @@ fn main() -> std::io::Result<()> {
             jenv,
             [jvalue::str(jenv, "zhangsan"), jvalue::jint(18)].as_ptr(),
         )
-    }
-    .unwrap();
+    };
     unsafe {
         Counter::main(jenv, [jvalue::str(jenv, "")].as_ptr());
         println!(
             "5+8={}",
-            Counter::add(jenv, [jvalue::jint(5), jvalue::jint(8)].as_ptr()).unwrap()
+            Counter::add(jenv, [jvalue::jint(5), jvalue::jint(8)].as_ptr())
         );
         zhangsan.introduce(jenv, std::ptr::null());
         (*jvm).DestroyJavaVM();
