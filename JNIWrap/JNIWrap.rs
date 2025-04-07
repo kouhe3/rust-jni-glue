@@ -97,21 +97,21 @@ impl JavaVMInitArgs {
 
 /// JNIEnv 结构体的实现，定义 JNI 环境的方法
 impl JNIEnv {
-    jni_method!(NewObjectA: (jclass, jmethodID, *const jvalue) -> Option<jobject>  );
-    jni_method!(FindClass: (*const ::std::os::raw::c_char) -> Option<jclass>);
-    jni_method!(NewStringUTF: (*const ::std::os::raw::c_char) -> Option<jstring>);
-    jni_method!(CallStaticVoidMethodA: (jclass, jmethodID, *const jvalue) -> Option<()>);
-    jni_method!(CallStaticIntMethodA: (jclass, jmethodID, *const jvalue) -> Option<jint>);
-    jni_method!(CallVoidMethodA: (jobject, jmethodID, *const jvalue) -> Option<()>);
-    jni_method!(GetStaticMethodID: (jclass, *const ::std::os::raw::c_char, *const ::std::os::raw::c_char) -> Option<jmethodID>);
-    jni_method!(GetMethodID: (jclass, *const ::std::os::raw::c_char, *const ::std::os::raw::c_char) -> Option<jmethodID>);
-    jni_method!(GetObjectField: (jobject, jfieldID) -> Option<jobject>);
-    jni_method!(GetObjectClass: (jobject) -> Option<jclass>);
+    jni_method!(NewObjectA: (jclass, jmethodID, *const jvalue) -> jobject  );
+    jni_method!(FindClass: (*const ::std::os::raw::c_char) -> jclass);
+    jni_method!(NewStringUTF: (*const ::std::os::raw::c_char) -> jstring);
+    jni_method!(CallStaticVoidMethodA: (jclass, jmethodID, *const jvalue) -> ());
+    jni_method!(CallStaticIntMethodA: (jclass, jmethodID, *const jvalue) -> jint);
+    jni_method!(CallVoidMethodA: (jobject, jmethodID, *const jvalue) -> ());
+    jni_method!(GetStaticMethodID: (jclass, *const ::std::os::raw::c_char, *const ::std::os::raw::c_char) -> jmethodID);
+    jni_method!(GetMethodID: (jclass, *const ::std::os::raw::c_char, *const ::std::os::raw::c_char) -> jmethodID);
+    jni_method!(GetObjectField: (jobject, jfieldID) -> jobject);
+    jni_method!(GetObjectClass: (jobject) -> jclass);
 }
 
 /// JavaVM 结构体的实现，定义 Java 虚拟机的方法
 impl JavaVM {
-    jni_method!(DestroyJavaVM: () -> Option<i32>);
+    jni_method!(DestroyJavaVM: () -> i32);
 }
 
 /// jvalue 结构体的实现，定义创建不同类型 jvalue 的方法
@@ -128,7 +128,7 @@ impl jvalue {
             l: unsafe {
                 (*pjenv)
                     .NewStringUTF(CString::new(s).unwrap().as_ptr())
-                    .unwrap() as jobject
+                     as jobject
             },
         }
     }

@@ -39,9 +39,8 @@ impl FnStruct {
         quote! {
             pub unsafe fn #name(&mut self,#(#idents: #types),*) #ret{
                 unsafe {
-                    let r = (*self.functions)
-                        .#name?(self,#(#idents_clone),*);
-                    Some(r)
+                    (*self.functions)
+                        .#name.expect("Can not find JNI functions")(self,#(#idents_clone),*)
                 }
             }
         }
@@ -159,21 +158,21 @@ pub fn jni_constructor_body(input: Tok1) -> Tok1 {
             let jenv_ptr = #jenv;
             let args_ptr = #args;
             let class_name_cstr = ::std::ffi::CString::new(#class_name_str).expect("Invalid class name literal provided to jni_constructor_body");
-            let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr())?;
+            let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr());
             if class.is_null() {
-                return None;
+                panic!("Can not find class");
             }
             let constructor_name_cstr = ::std::ffi::CString::new("<init>").unwrap();
             let descriptor_cstr = ::std::ffi::CString::new(#descriptor_str).expect("Invalid descriptor literal provided to jni_constructor_body");
-            let method_id = (*jenv_ptr).GetMethodID(class, constructor_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
+            let method_id = (*jenv_ptr).GetMethodID(class, constructor_name_cstr.as_ptr(), descriptor_cstr.as_ptr());
             if method_id.is_null() {
-                return None;
+                panic!("Can not find constructor");
             }
-            let obj = (*jenv_ptr).NewObjectA(class, method_id, args_ptr)?;
+            let obj = (*jenv_ptr).NewObjectA(class, method_id, args_ptr);
             if obj.is_null() {
-                return None;
+                panic!("Can not create object");
             }
-            Some(Self(obj))
+            Self(obj)
         }
     };
     // 将生成的代码转换为 TokenStream 并返回
@@ -214,16 +213,16 @@ pub fn jni_method_body(input: Tok1) -> Tok1 {
             let jenv_ptr = #jenv;
             let args_ptr = #args;
             let self_obj = #obj;
-            let class = (*jenv_ptr).GetObjectClass(self_obj)?;
+            let class = (*jenv_ptr).GetObjectClass(self_obj);
             if class.is_null() {
-                return None;
+                panic!("Can not find class");
             }
-            let method_id = (*jenv_ptr).GetMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
+            let method_id = (*jenv_ptr).GetMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr());
             if method_id.is_null() {
-                return None;
+                panic!("Can not find method");
             }
-            let r = (*jenv_ptr).#identname(self_obj, method_id, args_ptr)?;
-            Some(r)
+            (*jenv_ptr).#identname(self_obj, method_id, args_ptr)
+            
         }
     };
     // 将生成的代码转换为 TokenStream 并返回
@@ -264,16 +263,16 @@ pub fn jni_static_method_body(input: Tok1) -> Tok1 {
             let descriptor_cstr = ::std::ffi::CString::new(#descriptor).expect("Invalid descriptor string literal");
             let jenv_ptr = #jenv;
             let args_ptr = #args;
-            let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr())?;
+            let class = (*jenv_ptr).FindClass(class_name_cstr.as_ptr());
             if class.is_null() {
-                return None;
+                panic!("Can not find class");
             }
-            let method_id = (*jenv_ptr).GetStaticMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr())?;
+            let method_id = (*jenv_ptr).GetStaticMethodID(class, method_name_cstr.as_ptr(), descriptor_cstr.as_ptr());
             if method_id.is_null() {
-                return None;
+                panic!("Can not find method");
             }
-            let r = (*jenv_ptr).#identname(class, method_id, args_ptr)?;
-            Some(r)
+            (*jenv_ptr).#identname(class, method_id, args_ptr)
+            
         }
     };
     // 将生成的代码转换为 TokenStream 并返回
