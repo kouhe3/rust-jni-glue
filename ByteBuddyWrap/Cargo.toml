@@ -1,0 +1,11 @@
+[package]
+name = "ByteBuddyWrap"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+JNIWrap ={ path = "../JNIWrap"}
+jnimacro ={ path = "../jnimacro"}
+JavaWrap ={ path = "../JavaWrap"}
+[lib]
+path = "lib.rs"

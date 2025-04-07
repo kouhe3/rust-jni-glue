@@ -294,6 +294,8 @@ fn return_type(descriptor: String) -> &'static str {
         Some('I') => "Int",
         // 如果是 'V'，表示返回类型为 void
         Some('V') => "Void",
+        // 如果是 ';'，表示返回类型为对象
+        Some(';') => "Object",
         // 其他情况抛出异常
         _ => panic!("Invalid return type"),
     }
