@@ -19,6 +19,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "JavaWrap"
+version = "0.1.0"
+dependencies = [
+ "JNIWrap",
+ "jnimacro",
+]
+
+[[package]]
 name = "PersonWrap"
 version = "0.1.0"
 dependencies = [
@@ -246,7 +254,9 @@ version = "0.1.0"
 dependencies = [
  "CounterWrap",
  "JNIWrap",
+ "JavaWrap",
  "PersonWrap",
+ "jnimacro",
 ]
 
 [[package]]

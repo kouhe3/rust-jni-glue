@@ -222,7 +222,7 @@ pub fn jni_method_body(input: Tok1) -> Tok1 {
                 panic!("Can not find method");
             }
             (*jenv_ptr).#identname(self_obj, method_id, args_ptr)
-            
+
         }
     };
     // 将生成的代码转换为 TokenStream 并返回
@@ -272,7 +272,7 @@ pub fn jni_static_method_body(input: Tok1) -> Tok1 {
                 panic!("Can not find method");
             }
             (*jenv_ptr).#identname(class, method_id, args_ptr)
-            
+
         }
     };
     // 将生成的代码转换为 TokenStream 并返回
@@ -293,6 +293,7 @@ fn return_type(descriptor: String) -> &'static str {
         Some('I') => "Int",
         // 如果是 'V'，表示返回类型为 void
         Some('V') => "Void",
+        Some(';') => "Object",
         // 其他情况抛出异常
         _ => panic!("Invalid return type"),
     }

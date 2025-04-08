@@ -1,0 +1,10 @@
+[package]
+name = "JavaWrap"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+JNIWrap = {path = "../JNIWrap"}
+jnimacro ={ path = "../jnimacro"}
+[lib]
+path = "lib.rs"

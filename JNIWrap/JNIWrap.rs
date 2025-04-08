@@ -7,8 +7,8 @@ pub mod JNI;
 
 // 引入 JNI 模块中的各种类型和函数
 use JNI::{
-    JNI_CreateJavaVM, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption, jclass, jfieldID, jint, jlong,
-    jmethodID, jobject, jstring, jvalue,
+    JNI_CreateJavaVM, JNIEnv, JavaVM, JavaVMInitArgs, JavaVMOption, jarray, jboolean, jclass,
+    jfieldID, jint, jlong, jmethodID, jobject, jobjectArray, jsize, jstring, jvalue,
 };
 // 引入标准库中的相关类型和函数
 use std::{ffi::CString, os::raw::c_void, ptr::null_mut};
@@ -102,11 +102,16 @@ impl JNIEnv {
     jni_method!(NewStringUTF: (*const ::std::os::raw::c_char) -> jstring);
     jni_method!(CallStaticVoidMethodA: (jclass, jmethodID, *const jvalue) -> ());
     jni_method!(CallStaticIntMethodA: (jclass, jmethodID, *const jvalue) -> jint);
+    jni_method!(CallStaticObjectMethodA: (jclass, jmethodID, *const jvalue) -> jobject);
     jni_method!(CallVoidMethodA: (jobject, jmethodID, *const jvalue) -> ());
+    jni_method!(CallObjectMethodA: (jobject, jmethodID, *const jvalue) -> jobject);
     jni_method!(GetStaticMethodID: (jclass, *const ::std::os::raw::c_char, *const ::std::os::raw::c_char) -> jmethodID);
     jni_method!(GetMethodID: (jclass, *const ::std::os::raw::c_char, *const ::std::os::raw::c_char) -> jmethodID);
     jni_method!(GetObjectField: (jobject, jfieldID) -> jobject);
     jni_method!(GetObjectClass: (jobject) -> jclass);
+    jni_method!(GetArrayLength: (jarray) -> jsize);
+    jni_method!(GetObjectArrayElement: (jobjectArray, jsize) -> jobject);
+    jni_method!(GetStringUTFChars: (jstring, *mut jboolean) -> *const ::std::os::raw::c_char);
 }
 
 /// JavaVM 结构体的实现，定义 Java 虚拟机的方法
@@ -123,13 +128,9 @@ impl jvalue {
     /// - `s` 必须是一个有效的 UTF-8 字符串。
     /// - 调用者必须确保 `pjenv` 指向的 JNI 环境是有效的，并且当前线程已附加到 JVM。
     /// - 返回的 `jstring` 是一个本地引用，调用者需要确保在调用后正确管理其生命周期。
-    pub unsafe fn str(pjenv: *mut JNIEnv, s: &str) -> jvalue {
+    pub unsafe fn str(jenv: *mut JNIEnv, s: &str) -> jvalue {
         jvalue {
-            l: unsafe {
-                (*pjenv)
-                    .NewStringUTF(CString::new(s).unwrap().as_ptr())
-                     as jobject
-            },
+            l: unsafe { (*jenv).NewStringUTF(CString::new(s).unwrap().as_ptr()) as jobject },
         }
     }
 
@@ -146,5 +147,15 @@ impl jvalue {
     /// 创建一个空的 `jvalue`（表示 `null`）。
     pub fn null() -> jvalue {
         jvalue { l: null_mut() }
+    }
+
+    pub unsafe fn class(jenv: *mut JNIEnv, s: &str) -> jvalue {
+        jvalue {
+            l: unsafe { (*jenv).FindClass(CString::new(s).unwrap().as_ptr()) as jobject },
+        }
+    }
+
+    pub fn object(obj: jobject) -> jvalue {
+        jvalue { l: obj }
     }
 }
