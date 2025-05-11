@@ -1,0 +1,2 @@
+I gave up on this project. It was a good opportunity to learn how to write proc macros, but this project is extremely unsafe and inefficient. :(
+He couldn't solve the generic problem. There are still many issues that this project didn't take into account, so I decided to abandon it. If you are interested in continuing to explore using Java libraries in Rust, you can take a look at the rustc_codegen_jvm project.  
